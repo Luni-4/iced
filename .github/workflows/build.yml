@@ -7,7 +7,12 @@ jobs:
   todos_linux:
     runs-on: ubuntu-latest
     steps:
+    - name: Install musl-tools
+      run: |
+        sudo apt-get install musl-tools
     - uses: hecrj/setup-rust-action@v1
+      with:
+        target: x86_64-unknown-linux-musl
     - name: Install cargo-deb
       run: cargo install cargo-deb
     - uses: actions/checkout@master
@@ -21,21 +26,22 @@ jobs:
         echo "[profile.release]" >> Cargo.toml
         echo "lto = true" >> Cargo.toml
     - name: Build todos binary
-      run: cargo build --verbose --release --package todos
+      run: cargo build --target x86_64-unknown-linux-musl --verbose --release --package todos
     - name: Archive todos binary
       uses: actions/upload-artifact@v1
       with:
-        name: todos-x86_64-unknown-linux-gnu
-        path: target/release/todos
+        name: todos-x86_64-unknown-linux-musl
+        path: target/x86_64-unknown-linux-musl/release/todos
     - name: Pack todos .deb package
-      run: cargo deb --no-build --package todos
+      run: cargo deb --target x86_64-unknown-linux-musl --no-build --package todos
     - name: Rename todos .deb package
-      run: mv target/debian/*.deb target/debian/iced_todos-x86_64-debian-linux-gnu.deb
+      run: |
+        mv target/x86_64-unknown-linux-musl/debian/*.deb target/x86_64-unknown-linux-musl/debian/iced_todos-x86_64-debian-linux-musl.deb
     - name: Archive todos .deb package
       uses: actions/upload-artifact@v1
       with:
-        name: todos-x86_64-debian-linux-gnu
-        path: target/debian/iced_todos-x86_64-debian-linux-gnu.deb
+        name: todos-x86_64-debian-linux-musl
+        path: target/x86_64-unknown-linux-musl/debian/iced_todos-x86_64-debian-linux-musl.deb
 
   todos_windows:
     runs-on: windows-latest
