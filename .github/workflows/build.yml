@@ -1,8 +1,7 @@
 name: Build
-on:
-  push:
-    branches:
-      - master
+
+on: push
+
 jobs:
   todos_linux:
     runs-on: ubuntu-latest
